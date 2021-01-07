@@ -26,8 +26,36 @@ struct ContentView: View {
 //    }
     
     // musicplayer view
+//    @State var selection = 0
     var body: some View {
-        MusicPlayer().navigationTitle("Conference Player")
+        
+        
+        // Q: Why does LEAVING the tab start another audio stream?
+        // Q: What does the `$` signify?
+        // Q: Why do we need to set tag value? Does that help?
+        
+//        TODO: Preserve state so it doesn't restart...
+        // https://stackoverflow.com/questions/57772137/tabview-resets-navigation-stack-when-switching-tabs
+        
+        // TODO remove tags and $selection (crashes?)
+//        TabView(selection: $selection) {
+        TabView() {
+            MusicPlayer().navigationTitle("Conference Player").tabItem { //Q: Syntax what's difference between tabItem() and tabItem {}?
+                Image(systemName: "play.fill")
+                Text("Now playing")
+            }//.tag(0) // Q: Does this even help? What benefit does this have?
+            
+            Text("second tab").tabItem {
+                Image(systemName: "mostViewed")
+                Text("Queue: Up next")
+            }
+            
+            Text("third tab").tabItem {
+                Image(systemName: "search")
+                Text("Explore")
+            }
+        }
+        
 //        TabView {
 //            ContentView()
 //                .tabItem {
@@ -56,6 +84,7 @@ struct MusicPlayer :View {
 
     // inital state?
     // anything here can then be accessed in self.*
+    // this state is preserved between tab switches so that's good.
     @State var data : Data = .init(count: 0)
     @State var title = ""
     //@State var player : AVAudioPlayer! // used for playing a local file (doesn't support streaming)
@@ -70,6 +99,8 @@ struct MusicPlayer :View {
     @State var currentSong = 0
     @State var isFinished = false
     @State var del = AVdelegate() // WHAT does this do?
+    
+    @State var playerHasBeenSetup = false // so we don't init the player on each tab switch...
 
     
     // Q: Does this render every cycle or on state change like react does? I think so...
@@ -214,7 +245,21 @@ struct MusicPlayer :View {
             
             
         }.padding()
+        
+        // this works fine
+        .onDisappear() {
+//            self.counter += 1
+//            print("## FIRST TAB: DIS-APPEAR: \(counter)")
+        }
+        // WHY is this called when you move OFF of first tab?!?
         .onAppear(){
+            
+            if (self.playerHasBeenSetup == true) {
+                return
+            }
+            
+//            self.counter += 1
+//            print("## FIRST TAB: APPEAR: \(counter)")
 //
             // TODO try this...
             //https://stackoverflow.com/questions/34563329/how-to-play-mp3-audio-from-url-in-ios-swift
@@ -279,6 +324,9 @@ struct MusicPlayer :View {
                     print("Error: \(error.localizedDescription)")
                 }
 
+            // TODO: move to end of this block? Or refactor this function better?
+            // FIXME: consider just having a getter where it returns a new instance or existing one?
+            self.playerHasBeenSetup = true
             
             setupRemoteTransportControls()
             setupNowPlaying()
