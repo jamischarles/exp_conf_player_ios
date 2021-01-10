@@ -12,7 +12,7 @@ import MediaPlayer
 
 struct ContentView: View {
     func viewDidLoad() {
-        
+        // TOOD: init the music player here the first time just so we have everything loaded and available...
     }
     
     // basic list view
@@ -26,9 +26,25 @@ struct ContentView: View {
 //    }
     
     // musicplayer view
-//    @State var selection = 0
+    @State var selection = 0 // Q: Can I access this inside musicplayer? maybe I need to pass it in? Or via self.parent?
+    
+    // shared music player state (not really part of a specific view...)
+    // TODO: consider moving this to a model? We'll pass this in to musicPlayer...
+    // WORKED GREAT! TODO: use this for 3-4 vars including player and playerItem... And then make a class or something or just a func outside that can update all these... Or just have this be a local method for the parent view... right here...
+    @State var player : AVPlayer! // supports streaming a internet url
+    @State var playerItem: AVPlayerItem = AVPlayerItem(url: URL(string: "Bogus")!) // bogus init value FIXME: Whish we didn't need this for duration...
+    @State var isPlaying = false
+    @State var currentTime = 0
+    @State var trackDuration : Double = 0
+    @State var title = ""
+    @State var artistImageUrl = "" // TODO add placeholder instead before it's ready? Sounds like there's a render pass where this isn't bound yet...
+    @State var pillWidth : CGFloat = 0
+//    @State var timeObserverRef : Any // keep ref to observer so we can remove it
+    
+    // TODO: ask Sahel how to handle this...
     var body: some View {
-        
+        // TODO: maybe just make this an obj / map?
+        let Player = MusicPlayer(player: $player, playerItem: $playerItem, isPlaying: $isPlaying, currentTime: $currentTime, trackDuration: $trackDuration, title: $title, artistImageUrl: $artistImageUrl, pillWidth: $pillWidth)
         
         // Q: Why does LEAVING the tab start another audio stream?
         // Q: What does the `$` signify?
@@ -37,23 +53,56 @@ struct ContentView: View {
 //        TODO: Preserve state so it doesn't restart...
         // https://stackoverflow.com/questions/57772137/tabview-resets-navigation-stack-when-switching-tabs
         
+        
         // TODO remove tags and $selection (crashes?)
-//        TabView(selection: $selection) {
-        TabView() {
-            MusicPlayer().navigationTitle("Conference Player").tabItem { //Q: Syntax what's difference between tabItem() and tabItem {}?
+        TabView(selection: $selection) {
+//        TabView() {
+           
+            Player.navigationTitle("Conference Player").tabItem { //Q: Syntax what's difference between tabItem() and tabItem {}?
                 Image(systemName: "play.fill")
                 Text("Now playing")
-            }//.tag(0) // Q: Does this even help? What benefit does this have?
+            }.tag(0) // Q: Does this even help? What benefit does this have?
             
-            Text("second tab").tabItem {
-                Image(systemName: "mostViewed")
-                Text("Queue: Up next")
-            }
+            Text("third tab").tabItem {
+                Image(systemName: "search")
+                Text("Queue")
+            }.tag(1)
             
             Text("third tab").tabItem {
                 Image(systemName: "search")
                 Text("Explore")
-            }
+            }.tag(2)
+            
+            // TODO turn this into looping list that generates...
+            NavigationView {
+                List {
+                    Button(action: {
+                        let url = "https://media2.ldscdn.org/assets/general-conference/april-2013-general-conference/2013-04-5010-elder-jeffrey-r-holland-64k-eng.mp3"
+                        let title = "Lord, I Believe - Jeffrey R. Holland"
+                        let imgUrl = "elder-holland.jpeg"
+                        Player.changeTrack(url: url, title: title, imgUrl: imgUrl)
+                        self.selection = 0
+                    }) {
+                        let title = "Lord, I Believe - Jeffrey R. Holland"
+                        Text(title)
+                    }
+                    Button(action: {
+                        let url = "https://media2.ldscdn.org/assets/general-conference/april-2014-general-conference/2014-04-4050-elder-david-a-bednar-64k-eng.mp3"
+                        let title = "Bear up their burdens - David A. Bednar"
+                        let imgUrl = "elder-bednar.jpeg"
+                        Player.changeTrack(url: url, title: title, imgUrl: imgUrl)
+                        self.selection = 0
+                    }) {
+                        let title = "Bear up their burdens - David A. Bednar"
+                        Text(title)
+                    }
+                    Text("Second Item")
+                    Text("Third Item")
+                }
+            }.navigationTitle("Queue").tabItem {
+                Image(systemName: "heart")
+                Text("Favorites")
+            }.tag(3)
         }
         
 //        TabView {
@@ -70,49 +119,71 @@ struct ContentView: View {
 }
 
 // for right hand view in xcode
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
+//struct ContentView_Previews: PreviewProvider {
+//    static var previews: some View {
+////        ContentView()
+//    }
+//}
 
 // is this the equivalent of a view controller?
 struct MusicPlayer :View {
+    // props passed in from parent. Q: Can / should we set default values here?
+    @Binding var player : AVPlayer!
+    @Binding var playerItem: AVPlayerItem
+    @Binding var isPlaying : Bool
+    @Binding var currentTime : Int
+    @Binding var trackDuration : Double
+    @Binding var title : String
+    @Binding var artistImageUrl : String
+    @Binding var pillWidth: CGFloat // progress for track
+//    @Binding var timeObserverRef : Any
+    
     // force light mode
 
-    
+    // this is a tab state issue... should we move the state up a level? so it can be preserved? TODO: google that...
 
     // inital state?
     // anything here can then be accessed in self.*
     // this state is preserved between tab switches so that's good.
     @State var data : Data = .init(count: 0)
-    @State var title = ""
+    
     //@State var player : AVAudioPlayer! // used for playing a local file (doesn't support streaming)
-    @State var player : AVPlayer! // supports streaming a internet url
-    @State var playerItem: AVPlayerItem = AVPlayerItem(url: URL(string: "Bogus")!) // bogus init value FIXME: Whish we didn't need this for duration...
-    @State var isPlaying = false
+    
+    
     // NOTE: interesting. If I don't assign it here, it expects it to be passed in as params.
-    @State var currentTime = 0
-    @State var duration : Double = 0
-    @State var width: CGFloat = 0
-    @State var songs = ["black", "bad"]
-    @State var currentSong = 0
+    
+    
+    
+//    @State var songs = ["black", "bad"]
+//    @State var currentSong = 0
     @State var isFinished = false
     @State var del = AVdelegate() // WHAT does this do?
     
     @State var playerHasBeenSetup = false // so we don't init the player on each tab switch...
-
+    
     
     // Q: Does this render every cycle or on state change like react does? I think so...
     var body: some View {
         
         VStack(spacing: 10 ) {
             // FIXME: where should image live? not in folder...
-            Image(uiImage: self.data.count == 0 ? UIImage(named: "elder-bednar.jpeg")! : UIImage(data: self.data)!)
-                .resizable()
-                .frame(width: self.data.count == 0 ? 208 : nil, height: 266)
-                
-                .cornerRadius(15)
+//            Image(uiImage: (self.artistImageUrl != nil) ? UIImage(named: self.artistImageUrl)! : UIImage(data: self.data)!)
+            // FIXME: we need to guard for this?!? Sounds like there's one pass where bindings aren't bound yet?
+            
+            // FIXME...
+            // why isn't this auto-updated on first pass?!?
+            if (self.artistImageUrl == "") {
+                Text("Loading...")
+            } else {
+                Image(uiImage: UIImage(named: self.artistImageUrl)!)
+                    .resizable()
+                    .frame(width: self.data.count == 0 ? 208 : nil, height: 266)
+                    
+                    .cornerRadius(15)
+            }
+            
+            
+            
             
 //            MPMediaItemArtwork(boundsSize: image.size) { size in
 //                return image
@@ -120,8 +191,8 @@ struct MusicPlayer :View {
 
             // title is coming from the metadata from the file... Cool!
 //            Text(self.title).font(.title).padding(.top).colorInvert()
-            Text("Bear up their burdens - David A. Bednar").font(.subheadline) //font(.title)//.padding(.top)
-            Text("\(getTimestringFromSeconds(seconds: self.currentTime))/\(getTimestringFromSeconds(seconds: Int(self.duration)))").font(.body)
+            Text(self.title).font(.subheadline) //font(.title)//.padding(.top)
+            Text("\(getTimestringFromSeconds(seconds: self.currentTime))/\(getTimestringFromSeconds(seconds: Int(self.trackDuration)))").font(.body)
 //            Spacer() // forces a big space in here and pushes everything else
 
             // stack things on top of each other
@@ -129,13 +200,13 @@ struct MusicPlayer :View {
                 // red progress bar for song...
                 Capsule().fill(Color.black.opacity(0.08)).frame(height: 8)
 //                Capsule().fill(Color.red).frame(width: 200, height: 8) // fixed width
-                Capsule().fill(Color.red).frame(width: self.width, height: 8)
+                Capsule().fill(Color.red).frame(width: self.pillWidth, height: 8)
                     .gesture(DragGesture()
 
                                 // support for drag & drop on the red progress bar
                         .onChanged({ (value) in
                             let x = value.location.x
-                            self.width = x
+                            self.pillWidth = x
 
                         })
 
@@ -148,11 +219,21 @@ struct MusicPlayer :View {
                             
                             // update current time after draf
                             // FIXME: extract into function
-                            self.currentTime = Int(Double(percent) * self.duration)
+                            self.currentTime = Int(Double(percent) * self.trackDuration)
                             
                             let time = CMTime(value: Int64(self.currentTime), timescale: 1)
+//                            print("priorTime: \(priorTime) | currentTime: \(self.currentTime) | time: \(time)")
+//                            let changeTimeBy = self.currentTime - priorTime // forces positive result
+
                             
-                            self.player.seek(to: time  )
+                            pause() // need to pause before seeking or weird bugs happen (lock screen progress stops)
+                            self.player.seek(to: time) { (didSucceed) in
+                                let isPlaying = getPlayerStatus()
+//                                print("isPlaying", isPlaying)
+                                updateNowPlaying(isPause: isPlaying) // update lock screen with position
+                            }
+                            play()
+
                         }))
 
             }
@@ -160,10 +241,10 @@ struct MusicPlayer :View {
 
             HStack(spacing: UIScreen.main.bounds.width / 5 - 30){
                 Button(action: {
-                    if self.currentSong > 0 {
-                        self.currentSong -= 1
-                        self.changeSongs()
-                    }
+//                    if self.currentSong > 0 {
+//                        self.currentSong -= 1
+//                        self.changeSongs()
+//                    }
                 }) {
                     Image(systemName: "backward.fill").font(.title)
                 }.colorInvert()
@@ -222,6 +303,7 @@ struct MusicPlayer :View {
 
                 Button(action: {
                     seekForward(seconds: 30)
+
 //                    let increase = self.player.currentTime + 15
 //
 //                    // if +15s would go beyond end of total time, ignore
@@ -233,10 +315,10 @@ struct MusicPlayer :View {
                 }.colorInvert()
 
                 Button(action: {
-                    if self.songs.count - 1 != self.currentSong {
-                        self.currentSong += 1
-                        self.changeSongs()
-                    }
+//                    if self.songs.count - 1 != self.currentSong {
+//                        self.currentSong += 1
+//                        self.changeSongs()
+//                    }
                 }) {
                     Image(systemName: "forward.fill").font(.title)
                 }.colorInvert()
@@ -261,6 +343,9 @@ struct MusicPlayer :View {
 //            self.counter += 1
 //            print("## FIRST TAB: APPEAR: \(counter)")
 //
+            // Q: Should this state live higher up? Similar to react model where we just inherit it...? Maybe we should try that...
+//            changeTrack(newUrl: "https://media2.ldscdn.org/assets/general-conference/april-2014-general-conference/2014-04-4050-elder-david-a-bednar-64k-eng.mp3")
+            
             // TODO try this...
             //https://stackoverflow.com/questions/34563329/how-to-play-mp3-audio-from-url-in-ios-swift
 
@@ -270,15 +355,21 @@ struct MusicPlayer :View {
 
             // 2) With song from internet
 //            let url = Bundle.main.path(forResource: "https://media2.ldscdn.org/assets/general-conference/april-2014-general-conference/2014-04-4050-elder-david-a-bednar-64k-eng", ofType: "mp3")
-            let url = URL(string: "https://media2.ldscdn.org/assets/general-conference/april-2014-general-conference/2014-04-4050-elder-david-a-bednar-64k-eng.mp3")
+//            let url = URL(string: "https://media2.ldscdn.org/assets/general-conference/april-2014-general-conference/2014-04-4050-elder-david-a-bednar-64k-eng.mp3")
 
 //            let url = URL(string: "https://file-examples.com/wp-content/uploads/2017/11/file_example_MP3_700KB.mp3")
-            let playerItem = AVPlayerItem(url: url!)
+//            let playerItem = AVPlayerItem(url: url!)
 
+            // load initial track
+            // TODO change this later...
+            // TODO: store these in a map maybe? Where you can do that lookup
+            let url = "https://media2.ldscdn.org/assets/general-conference/april-2013-general-conference/2013-04-5010-elder-jeffrey-r-holland-64k-eng.mp3"
+            let title = "Lord, I Believe - Jeffrey R. Holland"
+            let imgUrl = ""
+            changeTrack(url: url, title: title, imgUrl: imgUrl)
             
             
-            
-            do {
+//            do {
                 // media controls for lock screen?
                 
                 
@@ -314,22 +405,20 @@ struct MusicPlayer :View {
 //                commandCenter.pauseCommand.isEnabled = true
 
                 // auto play
-                self.player = AVPlayer(playerItem:playerItem)
-                self.playerItem = playerItem // need this for getTrackDuration
-//                    let audioPlayer = try AVAudioPlayer(contentsOf: sound)
-                //self.player.prepareToPlay()
-                self.player.play()
-                self.isPlaying = true
-                }catch let error {
-                    print("Error: \(error.localizedDescription)")
-                }
+//                self.player = AVPlayer(playerItem:playerItem)
+//                self.playerItem = playerItem // need this for getTrackDuration
+                
+
+                
+//                self.player.play()
+//                self.isPlaying = true
+//                }catch let error {
+//                    print("Error: \(error.localizedDescription)")
+//                }
 
             // TODO: move to end of this block? Or refactor this function better?
             // FIXME: consider just having a getter where it returns a new instance or existing one?
-            self.playerHasBeenSetup = true
             
-            setupRemoteTransportControls()
-            setupNowPlaying()
             
 //            setupNowPlaying()
 //            setupRemoteTransportControls()
@@ -344,7 +433,7 @@ struct MusicPlayer :View {
 
 //            self.player.prepareToPlay() // not working... is it a CPU issue?
             // TODO: restart and try again...
-            self.getData()
+//            self.getData()
             
             // these both work
 //            let duration = Double(playerItem.asset.duration.value) / Double(playerItem.asset.duration.timescale)
@@ -358,35 +447,10 @@ struct MusicPlayer :View {
             // only one that works...
 //            let duration = Double(playerItem.asset.duration.value) / Double(playerItem.asset.duration.timescale)
             let duration = getTrackDuration()
-            self.duration = duration
+            self.trackDuration = duration
     
             
-            // is this the only way to get currentTime with a avplayer streaming thing?
-            // adds a periodic observer...
-            self.player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, preferredTimescale: 1), queue: DispatchQueue.main, using: { (time) in
-                // FIXME: move this to other function?
-                // Q: What is the status? when this doesn't work
-                if self.player!.currentItem?.status == .readyToPlay {
-//                    print("is ready to play, increment")
-                    let currentTime = CMTimeGetSeconds(self.player!.currentTime())
-                    self.currentTime = Int(currentTime)
-                    
-//                    let secs = Int(currentTime)
-                    
-                    let screen = UIScreen.main.bounds.width - 30
-                    //
-                    let value = currentTime / duration
-                    
-                    
-                    // starts width at 0 (for red pill progress) (see state)
-                    // then every second increase based on value (% completion)
-                    self.width = screen * CGFloat(value)
-                    
-                    //                        self.timeLabel.text = NSString(format: "%02d:%02d", secs/60, secs%60) as String//"\(secs/60):\(secs%60)"
-                    //                        print("currentTime", currentTime)
-                }
-                
-            })
+            
 
             // this is like setTimout? Every second print the current time?
 //            Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (_) in
@@ -446,6 +510,94 @@ struct MusicPlayer :View {
             }
             
         }
+    }
+    
+    // TODO later change what we pass in...
+    public func changeTrack(url: String, title: String, imgUrl: String) {
+        let url = URL(string: url)
+        let playerItem = AVPlayerItem(url: url!)
+        
+//        self.player = AVPlayer(playerItem:playerItem)
+//        self.playerItem = playerItem
+        
+        // don't do this the first time... because we get error
+        if (self.isPlaying) {
+            pause()
+        }
+        
+//        self.player?.pause()
+        
+        // avoid double registering time observers
+//        if (self.timeObserverRef != nil) {
+//            self.player?.removeTimeObserver(self.timeObserverRef)
+//        }
+        
+        do {
+            // auto play
+            // Q: WHY is player nil?
+            
+            self.playerItem = playerItem // need this for getTrackDuration
+            self.player = AVPlayer(playerItem:playerItem)
+            // FIXME: We'll likely get multiple observers this way. Would be good to store a ref and remove? Maybe not needed... since this is wiped when we change tracks, esp from other tabs...
+            addTimeObserverForTrack() // new player, new observer... Q: Do we need to unobserve first? Mem leak?
+            self.title = title
+            self.artistImageUrl = imgUrl
+            
+        
+//            self.player?.prepareToPlay()
+//            self.player?.play()
+            // do all the setup first for lock screen...
+            // TODO: do we have to wait until the player has been init?
+            // on first run self.player is now set... Why is it missing later?
+            let titleParts = title.components(separatedBy: " - ")
+            
+            
+            self.isPlaying = true
+            
+            self.playerHasBeenSetup = true
+            // is this after? or before?
+            setupRemoteTransportControls()
+            setupNowPlaying(title: titleParts[0], artist: titleParts[1], imageUrl: imgUrl)
+            
+            play()
+        }catch let error {
+            print("Error: \(error.localizedDescription)")
+        }
+        
+        print("playing new track: \(url)")
+    }
+    
+    // ensures we can keep count of elapsed time (every second)
+    func addTimeObserverForTrack() -> Any {
+        // is this the only way to get currentTime with a avplayer streaming thing?
+        // adds a periodic observer...
+        
+        return self.player?.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(1, preferredTimescale: 1), queue: DispatchQueue.main, using: { (time) in
+            // FIXME: move this to other function?
+            // Q: What is the status? when this doesn't work
+            if self.player!.currentItem?.status == .readyToPlay {
+//                    print("is ready to play, increment")
+                
+                let currentTime = CMTimeGetSeconds(self.player!.currentTime())
+                self.currentTime = Int(currentTime)
+                print("time being observed: \(currentTime)")
+                
+//                    let secs = Int(currentTime)
+                
+                let screen = UIScreen.main.bounds.width - 30
+                //
+                let value = currentTime / self.trackDuration
+                
+                
+                // starts width at 0 (for red pill progress) (see state)
+                // then every second increase based on value (% completion)
+                self.pillWidth = screen * CGFloat(value)
+                
+                //                        self.timeLabel.text = NSString(format: "%02d:%02d", secs/60, secs%60) as String//"\(secs/60):\(secs%60)"
+                //                        print("currentTime", currentTime)
+            }
+            
+        })  // LAME
     }
     
     func getTimestringFromSeconds(seconds: Int) ->String {
@@ -625,7 +777,7 @@ struct MusicPlayer :View {
         // Add handler for Pause Command
         commandCenter.pauseCommand.addTarget { [ self] event in
             let isPlaying = getPlayerStatus()
-            print("Pause command - is playing: \(isPlaying)")
+            print("Pause command - is playing: \(isPlaying)") // Q: Why is this always false?
             if isPlaying {
                 self.pause()
                 return .success
@@ -677,14 +829,15 @@ struct MusicPlayer :View {
     }
 
     // runs first time
-    func setupNowPlaying() {
+    func setupNowPlaying(title: String, artist: String, imageUrl: String) {
         // Define Now Playing Info
         var nowPlayingInfo = [String : Any]()
-        nowPlayingInfo[MPMediaItemPropertyTitle] = "Bear up their burdens"
-        nowPlayingInfo[MPMediaItemPropertyArtist] = "David A. Bednar"
+        nowPlayingInfo[MPMediaItemPropertyTitle] = title //"Bear up their burdens"
+        nowPlayingInfo[MPMediaItemPropertyArtist] = artist //"David A. Bednar"
 //        nowPlayingInfo[MPMediaItemPropertyAlbum] = "LDS Playlist"
 
-        if let image = UIImage(named: "elder-bednar.jpeg") {
+        // TODO Later: load image from URL dynamically
+        if let image = UIImage(named: self.artistImageUrl) {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { size in
                 return image
             }
@@ -698,14 +851,16 @@ struct MusicPlayer :View {
     }
 
     func play() {
-        self.player.play()
+        self.player?.play()
+        self.isPlaying = true
 //        playPauseButton.setTitle("Pause", for: UIControl.State.normal)
         updateNowPlaying(isPause: false)
         print("Play - current time: \(String(describing: getElapsedTime())) - is playing: \(getPlayerStatus())")
     }
 
     func pause() {
-        self.player.pause()
+        self.player?.pause()
+        self.isPlaying = false
 //        playPauseButton.setTitle("Play", for: UIControl.State.normal)
         updateNowPlaying(isPause: true)
         print("Pause - current time: \(getElapsedTime()) - is playing: \(getPlayerStatus())")
@@ -760,12 +915,16 @@ struct MusicPlayer :View {
         // Define Now Playing Info
         var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo!
         
+        
         // this updates the lock screen with current info
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = getElapsedTime()
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPause ? 0 : 1
 
         // Set the metadata on the lockscreen
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    
+        
+        
     }
     
     // universal way to get the player status
@@ -779,6 +938,10 @@ struct MusicPlayer :View {
         
         
         return isPlaying
+    }
+    
+    func testState() {
+        print("self \(self)")
     }
     
     func getElapsedTime() -> Double {
