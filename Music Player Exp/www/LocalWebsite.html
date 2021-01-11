@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <!-- Your iOS web app meta tags -->
+  <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,user-scalable = no">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <!-- iOS web app meta tags end -->
+  <title>Local Website</title>
+  <style>
+      h1 {
+          font-size: 40px;
+      }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    p {
+        font-size: 30px;
+    }
+  </style>
+</head>
+<body>
+    <h1 style="color: black;">Explore conf talks</h1>
+
+<!--    <p>This example shows how to interact between iOS native app and a web app through JavaScript Functions.</p>-->
+
+<!--    <p id="output"></p>-->
+<!--    <a href="http://www.cnn.com">Change track</a>-->
+    
+    <h2>David A. Bednar</h2>
+    <ul>
+        <li>
+        <a href="player://change-track?url=https://media2.ldscdn.org/assets/general-conference/april-2014-general-conference/2014-04-4050-elder-david-a-bednar-64k-eng.mp3&image=elder-bednar.jpeg">Bear up their Burdens | Play</a>
+        </li>
+        <li>
+        <a href="player://change-track?url=https://media2.ldscdn.org/assets/general-conference/april-2011-general-conference/2011-04-4050-elder-david-a-bednar-64k-eng.mp3">The spirit of revelation | Play</a>
+        </li>
+        
+        
+        
+    </ul>
+    
+    <h2>Atonement</h2>
+    <ul>
+        <li>
+        <a href="player://change-track?url=https://media2.ldscdn.org/assets/general-conference/october-2006-general-conference/2006-10-2080-elder-richard-g-scott-64k-eng.mp3">The Atonement Can Secure Your Peace and Happiness - Richard G. Scott | Play</a>
+        </li>
+        <li>
+        <a href="player://change-track?url=https://speeches.byu.edu/wp-content/uploads/mp3/Wilcox_Brad_2011_07_12.mp3">His Grace is sufficient - Brad Wilcox | Play</a>
+        </li>
+    </ul>
+
+    <script type = "text/javascript">
+        sendStringValueToIOS();
+        sendJsonValueToIOS();
+        
+        // This function sends a simple json value to iOS app
+        function sendJsonValueToIOS() {
+            // Here iOSNative is the name we passed from iOS app
+            window.webkit.messageHandlers.iOSNative.postMessage({Name : "John Doe"});
+        }
+    
+        // This function sends a string value to iOS app
+        function sendStringValueToIOS() {
+            // Here iOSNative is the name we passed from iOS app
+            window.webkit.messageHandlers.iOSNative.postMessage("Bla Bla Bla");
+        }
+    
+        function valueGotFromIOS(value) {
+            document.getElementById("output").innerHTML = value;
+        }
+    
+        
+    </script>
+</body>
+</html>
+

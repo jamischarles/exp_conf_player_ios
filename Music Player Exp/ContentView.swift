@@ -41,6 +41,16 @@ struct ContentView: View {
     @State var pillWidth : CGFloat = 0
 //    @State var timeObserverRef : Any // keep ref to observer so we can remove it
     
+    
+    func changeTab() {
+        print("CHANGE THE TAB")
+    }
+    
+    func changeTrack(newTitle: String) {
+        print("CHANGE TRACK FROM CHILD: \(newTitle)")
+        
+    }
+    
     // TODO: ask Sahel how to handle this...
     var body: some View {
         // TODO: maybe just make this an obj / map?
@@ -68,7 +78,8 @@ struct ContentView: View {
                 Text("Queue")
             }.tag(1)
             
-            Text("third tab").tabItem {
+            WebView(url: .localUrl, viewModel: ViewModel(), Player: Player, selectedParentTab: $selection ).tabItem {
+//                WebView(url: .publicUrl, viewModel: ViewModel()).tabItem { // WORKS! WOW
                 Image(systemName: "search")
                 Text("Explore")
             }.tag(2)
@@ -96,8 +107,8 @@ struct ContentView: View {
                         let title = "Bear up their burdens - David A. Bednar"
                         Text(title)
                     }
-                    Text("Second Item")
-                    Text("Third Item")
+//                    Text("Second Item")
+//                    Text("Third Item")
                 }
             }.navigationTitle("Queue").tabItem {
                 Image(systemName: "heart")
@@ -113,6 +124,8 @@ struct ContentView: View {
                 
             
 //        }
+        
+        
         
 
     }

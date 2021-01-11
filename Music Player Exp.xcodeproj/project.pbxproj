@@ -10,6 +10,9 @@
 		50173F1D259F7D9800F14801 /* elder-bednar.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 50173F1C259F7D9800F14801 /* elder-bednar.jpeg */; };
 		50732D402587B4B3002B0EAC /* bad.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 50732D3F2587B4B3002B0EAC /* bad.mp3 */; };
 		5092473425A9FF3900F481FC /* elder-holland.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 5092473325A9FF3900F481FC /* elder-holland.jpeg */; };
+		5092473925AB4C9000F481FC /* WebviewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5092473825AB4C9000F481FC /* WebviewViewModel.swift */; };
+		5092473E25AB4D4E00F481FC /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5092473D25AB4D4E00F481FC /* WebView.swift */; };
+		5092474F25AB623700F481FC /* www in Resources */ = {isa = PBXBuildFile; fileRef = 5092474E25AB623700F481FC /* www */; };
 		50C4BE6125865C0400307DFB /* Music_Player_ExpApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C4BE6025865C0400307DFB /* Music_Player_ExpApp.swift */; };
 		50C4BE6325865C0400307DFB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C4BE6225865C0400307DFB /* ContentView.swift */; };
 		50C4BE6525865C0600307DFB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 50C4BE6425865C0600307DFB /* Assets.xcassets */; };
@@ -40,6 +43,9 @@
 		50173F1C259F7D9800F14801 /* elder-bednar.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "elder-bednar.jpeg"; sourceTree = "<group>"; };
 		50732D3F2587B4B3002B0EAC /* bad.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = bad.mp3; sourceTree = "<group>"; };
 		5092473325A9FF3900F481FC /* elder-holland.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "elder-holland.jpeg"; sourceTree = "<group>"; };
+		5092473825AB4C9000F481FC /* WebviewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebviewViewModel.swift; sourceTree = "<group>"; };
+		5092473D25AB4D4E00F481FC /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
+		5092474E25AB623700F481FC /* www */ = {isa = PBXFileReference; lastKnownFileType = folder; path = www; sourceTree = "<group>"; };
 		50C4BE5D25865C0400307DFB /* Music Player Exp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Music Player Exp.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		50C4BE6025865C0400307DFB /* Music_Player_ExpApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Music_Player_ExpApp.swift; sourceTree = "<group>"; };
 		50C4BE6225865C0400307DFB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -109,8 +115,11 @@
 				5092473325A9FF3900F481FC /* elder-holland.jpeg */,
 				50173F1C259F7D9800F14801 /* elder-bednar.jpeg */,
 				50C4BE6225865C0400307DFB /* ContentView.swift */,
+				5092473825AB4C9000F481FC /* WebviewViewModel.swift */,
+				5092473D25AB4D4E00F481FC /* WebView.swift */,
 				50C4BE6425865C0600307DFB /* Assets.xcassets */,
 				50C4BE6925865C0700307DFB /* Info.plist */,
+				5092474E25AB623700F481FC /* www */,
 				50C4BE6625865C0600307DFB /* Preview Content */,
 			);
 			path = "Music Player Exp";
@@ -246,6 +255,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				50732D402587B4B3002B0EAC /* bad.mp3 in Resources */,
+				5092474F25AB623700F481FC /* www in Resources */,
 				50173F1D259F7D9800F14801 /* elder-bednar.jpeg in Resources */,
 				50C4BE6825865C0700307DFB /* Preview Assets.xcassets in Resources */,
 				5092473425A9FF3900F481FC /* elder-holland.jpeg in Resources */,
@@ -276,7 +286,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				50C4BE6325865C0400307DFB /* ContentView.swift in Sources */,
+				5092473E25AB4D4E00F481FC /* WebView.swift in Sources */,
 				50C4BE6125865C0400307DFB /* Music_Player_ExpApp.swift in Sources */,
+				5092473925AB4C9000F481FC /* WebviewViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
